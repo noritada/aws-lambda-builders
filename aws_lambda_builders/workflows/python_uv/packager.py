@@ -332,7 +332,8 @@ class PythonUvDependencyBuilder:
                 "--no-emit-project",  # Don't include the project itself, only dependencies
                 "--no-hashes",  # Skip hashes for cleaner output (optional)
                 "--no-default-groups",  # Exclude PEP 735 default groups (e.g. dev/test) from Lambda zips
-                "--no-editable",  # Export editable dependencies as non-editable
+                # Install package bodies instead of editable .pth links, which break in Lambda zips.
+                "--no-editable",
                 "--output-file",
                 temp_requirements,
                 # We want to specify the version because `uv export` might default to using a different one
@@ -350,9 +351,13 @@ class PythonUvDependencyBuilder:
             # regardless of where in the workspace uv export is called
             workspace_args = ["workspace", "dir"]
             rc, stdout, stderr = self._uv_runner._uv.run_uv_command(workspace_args, cwd=project_dir)
-            if rc != 0:
-                raise LockFileError(reason=f"Failed to get workspace root: {stderr}")
-            workspace_dir = stdout.strip()
+            if rc == 0:
+                workspace_dir = stdout.strip()
+            else:
+                # `uv workspace dir` requires uv >= 0.9.9. Fall back to the project directory,
+                # which is what that command returns for any non-workspace project anyway.
+                LOG.debug("Could not determine workspace root, assuming no workspace: %s", stderr)
+                workspace_dir = project_dir
 
             # Install with platform targeting
             self._uv_runner.install_requirements(
