@@ -136,9 +136,9 @@ class UvRunner:
         # Add requirements file
         args.extend(["-r", requirements_path])
 
-        # Resolve --target to an absolute path: UV runs with cwd set to the project directory, so a
-        # relative target (e.g. the incremental-build dependencies dir) would otherwise be created
-        # under the source directory instead of the build root.
+        # Resolve --target to an absolute path: UV runs from the project or workspace directory,
+        # so a relative target (e.g. the incremental-build dependencies dir) would otherwise be
+        # created under the UV's cwd instead of the build root.
         args.extend(["--target", os.path.abspath(target_dir)])
 
         # Add configuration arguments

@@ -126,8 +126,9 @@ class TestUvRunner(TestCase):
         self.assertIn("/path/to/requirements.txt", args_called)
 
     def test_install_requirements_resolves_relative_target_to_absolute(self):
-        # UV runs with cwd=project_dir, so a relative --target must be resolved to an absolute path
-        # first, otherwise dependencies land under the source dir instead of the build root.
+        # UV runs from project_dir or workspace_dir,
+        # so a relative --target must be resolved to an absolute path first,
+        # otherwise dependencies land under the source dir instead of the build root.
         self.mock_subprocess_uv.run_uv_command.return_value = (0, "success", "")
 
         self.uv_runner.install_requirements(
