@@ -267,7 +267,7 @@ class TestPythonUvDependencyBuilder(TestCase):
         self.mock_uv_runner.install_requirements.assert_called_once()
 
         # Verify install_requirements is called from workspace root
-        assert self.mock_uv_runner._uv.run_uv_command.call_args.kwargs["cwd"] == "path/to"
+        assert self.mock_uv_runner._uv.run_uv_command.call_args.kwargs["cwd"] == os.path.join("path", "to")
         assert self.mock_uv_runner.install_requirements.call_args.kwargs["cwd"] == "/workspace"
 
         # Verify it checked for uv.lock in the right location
