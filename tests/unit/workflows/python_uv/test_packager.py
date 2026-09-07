@@ -275,8 +275,13 @@ class TestPythonUvDependencyBuilder(TestCase):
 
         # Verify export excludes PEP 735 default dependency-groups (dev/test deps
         # must not land in Lambda zips).
-        export_args = self.mock_uv_runner._uv.run_uv_command.call_args_list[-2][0][0]
+        export_args = next(
+            call.args[0]
+            for call in self.mock_uv_runner._uv.run_uv_command.call_args_list
+            if call.args[0][0] == "export"
+        )
         self.assertIn("--no-default-groups", export_args)
+        self.assertIn("--no-editable", export_args)
 
     def test_build_dependencies_pyproject_without_uv_lock(self):
         """Test that pyproject.toml without uv.lock uses standard pyproject build."""
